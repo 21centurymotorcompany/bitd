@@ -21,7 +21,7 @@ var exit = function() {
 }
 var mempool =  {
   insert: async function(item) {
-    await db.collection("unconfirmed").insertMany(item).catch(function(err) {
+    await db.collection("unconfirmed").insertMany([item]).catch(function(err) {
       console.log("## ERR ", err, item)
       process.exit()
     })
