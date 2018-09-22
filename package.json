@@ -1,0 +1,25 @@
+{
+  "name": "bitd",
+  "version": "0.2.0",
+  "description": "decentralized autonomous database over bitcoin",
+  "main": "index.js",
+  "author": "21 Century Motor Company",
+  "license": "MIT",
+  "scripts": {
+    "start": "node index"
+  },
+  "dependencies": {
+    "bitcoind-rpc": "^0.7.2",
+    "dotenv": "^6.0.0",
+    "iconv-lite": "^0.4.24",
+    "ip": "^1.1.5",
+    "level": "^4.0.0",
+    "mingo": "^2.2.4",
+    "mongodb": "^3.1.4",
+    "p-limit": "^2.0.0",
+    "p-queue": "^3.0.0",
+    "traverse": "^0.6.6",
+    "tna": "0.1.0",
+    "zeromq": "^4.6.0"
+  }
+}
