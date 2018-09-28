@@ -1,6 +1,6 @@
 {
   "name": "bitd",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "decentralized autonomous database over bitcoin",
   "main": "index.js",
   "author": "21 Century Motor Company",
@@ -19,7 +19,7 @@
     "p-limit": "^2.0.0",
     "p-queue": "^3.0.0",
     "traverse": "^0.6.6",
-    "tna": "0.1.0",
+    "tna": "0.1.1",
     "zeromq": "^4.6.0"
   }
 }

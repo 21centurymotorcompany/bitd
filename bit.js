@@ -65,7 +65,7 @@ const request = {
     })
   },
   tx: async function(hash) {
-    let content = await TNA.fromHash(hash)
+    let content = await TNA.fromHash(hash, Config.rpc)
     return content
   },
   mempool: function() {
