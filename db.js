@@ -123,8 +123,13 @@ var block = {
             console.time('Index:' + keys[i])
             try {
               console.log(o)
-              await db.collection(collectionName).createIndex(o)
-              console.log('* Created index for ', keys[i])
+              if (keys[i] === "tx.h") {
+                await db.collection(collectionName).createIndex(o, { unique: true })
+                console.log('* Created unique index for ', keys[i])
+              } else {
+                await db.collection(collectionName).createIndex(o)
+                console.log('* Created index for ', keys[i])
+              }
             } catch (e) {
               console.log(e)
               process.exit()
