@@ -6,7 +6,8 @@
   "author": "21 Century Motor Company",
   "license": "MIT",
   "scripts": {
-    "start": "node index"
+    "start": "node index",
+    "lint": "./node_modules/.bin/eslint ."
   },
   "dependencies": {
     "bitcoind-rpc": "^0.7.2",
@@ -21,5 +22,8 @@
     "traverse": "^0.6.6",
     "tna": "0.1.1",
     "zeromq": "^4.6.0"
+  },
+  "devDependencies": {
+    "eslint": "^5.6.1"
   }
 }
