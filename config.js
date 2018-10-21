@@ -42,7 +42,7 @@ module.exports = {
       'port': '28332'
     },
     'outgoing': {
-      'host': "0.0.0.0",//process.env.host ? process.env.host : ip.address(),
+      'host': "0.0.0.0",
       'port': '28339'
     }
   }
