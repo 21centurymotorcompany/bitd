@@ -25,7 +25,6 @@ const init = function(db, info) {
 
     if (Filter.filter && Filter.filter.q && Filter.filter.q.find) {
       let query = bcode.encode(Filter.filter.q.find)
-      console.log('shard filter = ', query)
       filter = new mingo.Query(query)
     } else {
       filter = null
@@ -156,36 +155,16 @@ const listen = function() {
       let hash = message.toString('hex')
       console.log('New mempool hash from ZMQ = ', hash)
       await sync('mempool', hash)
-      /*
-      let m = await sync('mempool', hash)
-      outsock.send(['mempool', m])
-      */
     } else if (topic.toString() === 'hashblock') {
       let hash = message.toString('hex')
       console.log('New block hash from ZMQ = ', hash)
       await sync('block')
-      /*
-      let m = await sync('block')
-      // get mempool
-      // sync mempool db
-      if (m) {
-        // if the there was a new block, send message
-        outsock.send(['block', m])
-      }
-      */
     }
   })
 
   // Don't trust ZMQ. Try synchronizing every 1 minute in case ZMQ didn't fire
   setInterval(async function() {
     await sync('block')
-  /*
-    let m = await sync('block')
-    if (m) {
-      // if the there was a new block, send message
-      outsock.send(['block', m])
-    }
-    */
   }, 60000)
 
 }
