@@ -1,8 +1,8 @@
 FROM mongo:latest
 
-ARG wiredtiger_cache=1
-
-ENV WIREDTIGER_CACHE=$wiredtiger_cache
+#ARG wiredtiger_cache=1
+#
+#ENV WIRED_TIGER_CACHE=$wiredtiger_cache
 
 RUN apt-get update && \
     apt-get install -y wget unzip htop && \
@@ -23,9 +23,11 @@ COPY . /bitdb
 RUN cd /bitdb && rm -rf node_modules && npm install
 
 VOLUME /data/db
+VOLUME /bitdb/.state
 
 WORKDIR /bitdb
 
 EXPOSE 28332
+EXPOSE 28339
 
-CMD ["/bin/bash", "/bitdb/run.sh", "$WIREDTIGER_CACHE"]
+ENTRYPOINT ["/bitdb/entrypoint.sh"]

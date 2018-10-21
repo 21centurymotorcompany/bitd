@@ -10,6 +10,8 @@
     "lint": "./node_modules/.bin/eslint ."
   },
   "dependencies": {
+    "bcode": "0.0.6",
+    "bigjq": "0.0.7",
     "bitcoind-rpc": "^0.7.2",
     "dotenv": "^6.0.0",
     "iconv-lite": "^0.4.24",
@@ -19,8 +21,8 @@
     "mongodb": "^3.1.4",
     "p-limit": "^2.0.0",
     "p-queue": "^3.0.0",
+    "tna": "0.1.2",
     "traverse": "^0.6.6",
-    "tna": "0.1.1",
     "zeromq": "^4.6.0"
   },
   "devDependencies": {

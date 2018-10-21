@@ -20,11 +20,8 @@ var exit = function() {
   })
 }
 var mempool =  {
-  insert: async function(item) {
-    await db.collection('unconfirmed').insertMany([item]).catch(function(err) {
-      console.log('## ERR ', err, item)
-      process.exit()
-    })
+  insert: function(item) {
+    return db.collection('unconfirmed').insertMany([item])
   },
   reset: async function() {
     await db.collection('unconfirmed').deleteMany({}).catch(function(err) {
@@ -41,8 +38,11 @@ var mempool =  {
       let chunk = items.splice(0, 1000)
       if (chunk.length > 0) {
         await db.collection('unconfirmed').insertMany(chunk, { ordered: false }).catch(function(err) {
-          console.log('## ERR ', err, items)
-          process.exit()
+          // duplicates are ok because they will be ignored
+          if (err.code !== 11000) {
+            console.log('## ERR ', err, items)
+            process.exit()
+          }
         })
         console.log('..chunk ' + index + ' processed ...', new Date().toString())
         index++
@@ -73,14 +73,17 @@ var block = {
     console.log('Updating block', block_index, 'with', items.length, 'items')
     let index = 0
     while (true) {
-      let chunk = items.splice(0, 1000)
+      let chunk = items.slice(index, index+1000)
       if (chunk.length > 0) {
         await db.collection('confirmed').insertMany(chunk, { ordered: false }).catch(function(err) {
-          console.log('## ERR ', err, items)
-          process.exit()
+          // duplicates are ok because they will be ignored
+          if (err.code !== 11000) {
+            console.log('## ERR ', err, items)
+            process.exit()
+          }
         })
         console.log('\tchunk ' + index + ' processed ...')
-        index++
+        index+=1000
       } else {
         break
       }
@@ -88,20 +91,23 @@ var block = {
   },
   insert: async function(items, block_index) {
     let index = 0
-    try {
-      while (true) {
-        let chunk = items.splice(0, 1000)
-        if (chunk.length > 0) {
+    while (true) {
+      let chunk = items.slice(index, index+1000)
+      if (chunk.length > 0) {
+        try {
           await db.collection('confirmed').insertMany(chunk, { ordered: false })
           console.log('..chunk ' + index + ' processed ...')
-          index++
-        } else {
-          break
+        } catch (e) {
+          // duplicates are ok because they will be ignored
+          if (e.code !== 11000) {
+            console.log('## ERR ', e, items, block_index)
+            process.exit()
+          }
         }
+        index+=1000
+      } else {
+        break
       }
-    } catch (e) {
-      console.log('## ERR ', e, items, block_index)
-      process.exit()
     }
     console.log('Block ' + block_index + ' inserted ')
   },

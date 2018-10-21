@@ -1,9 +1,10 @@
+const ip = require('ip')
 module.exports = {
   'rpc': {
     'protocol': 'http',
     'user': 'root',
     'pass': 'bitcoin',
-    'host': '127.0.0.1',
+    'host': process.env.host ? process.env.host : ip.address(),
     'port': '8332',
     'limit': 15
   },
@@ -37,11 +38,11 @@ module.exports = {
   },
   'zmq': {
     'incoming': {
-      'host': process.env.host ? process.env.host : '127.0.0.1',
+      'host': process.env.host ? process.env.host : ip.address(),
       'port': '28332'
     },
     'outgoing': {
-      'host': process.env.host ? process.env.host : '127.0.0.1',
+      'host': "0.0.0.0",//process.env.host ? process.env.host : ip.address(),
       'port': '28339'
     }
   }

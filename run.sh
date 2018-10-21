@@ -1,4 +1,6 @@
+#!/bin/bash -x
 echo "# Starting Mongodb......."
+echo ${argv}
 #sudo service mongodb start
 sudo mongod --bind_ip_all --wiredTigerCacheSizeGB=${argv[0]} &
 until nc -z localhost 27017

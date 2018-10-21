@@ -6,30 +6,33 @@ const pQueue = require('p-queue')
 const Config = require('./config.js')
 const queue = new pQueue({concurrency: Config.rpc.limit})
 const mingo = require('mingo')
+const jq = require('bigjq')
+const bcode = require('bcode')
 
 const Filter = require('./bitdb.json')
 const Encoding = require('./encoding')
+
 var Db
 var Info
 var rpc
 var filter
+var processor
 
 const init = function(db, info) {
   return new Promise(function(resolve) {
     Db = db
     Info = info
 
-    if (Filter.filter) {
-      let q
-      if (Filter.filter.encoding) {
-        q = Encoding(Filter.filter.find, Filter.filter.encoding)
-      } else {
-        q = Filter.filter.find
-      }
-      console.log('shard filter = ', q)
-      filter = new mingo.Query(q)
+    if (Filter.filter && Filter.filter.q && Filter.filter.q.find) {
+      let query = bcode.encode(Filter.filter.q.find)
+      console.log('shard filter = ', query)
+      filter = new mingo.Query(query)
     } else {
       filter = null
+    }
+
+    if (Filter.filter && Filter.filter.r && Filter.filter.r.f) {
+      processor = Filter.filter.r.f
     }
 
     rpc = new RpcClient(Config.rpc)
@@ -122,7 +125,12 @@ const crawl = async function(block_index) {
       btxs = btxs.filter(function(row) {
         return filter.test(row)
       })
-      console.log('Filtered Xputs = ', btxs.length)
+
+      if (processor) {
+        btxs = bcode.decode(btxs)
+        btxs  = await jq.run(processor, btxs)
+      }
+      console.log("Filtered Xputs = ", btxs.length);
     }
 
     console.log('Block ' + block_index + ' : ' + txs.length + 'txs | ' + btxs.length + ' filtered txs')
@@ -131,6 +139,7 @@ const crawl = async function(block_index) {
     return []
   }
 }
+const outsock = zmq.socket('pub')
 const listen = function() {
   let sock = zmq.socket('sub')
   sock.connect('tcp://' + Config.zmq.incoming.host + ':' + Config.zmq.incoming.port)
@@ -138,7 +147,6 @@ const listen = function() {
   sock.subscribe('hashblock')
   console.log('Subscriber connected to port ' + Config.zmq.incoming.port)
 
-  let outsock = zmq.socket('pub')
   outsock.bindSync('tcp://' + Config.zmq.outgoing.host + ':' + Config.zmq.outgoing.port)
   console.log('Started publishing to ' + Config.zmq.outgoing.host + ':' + Config.zmq.outgoing.port)
 
@@ -147,11 +155,16 @@ const listen = function() {
     if (topic.toString() === 'hashtx') {
       let hash = message.toString('hex')
       console.log('New mempool hash from ZMQ = ', hash)
+      await sync('mempool', hash)
+      /*
       let m = await sync('mempool', hash)
       outsock.send(['mempool', m])
+      */
     } else if (topic.toString() === 'hashblock') {
       let hash = message.toString('hex')
       console.log('New block hash from ZMQ = ', hash)
+      await sync('block')
+      /*
       let m = await sync('block')
       // get mempool
       // sync mempool db
@@ -159,16 +172,20 @@ const listen = function() {
         // if the there was a new block, send message
         outsock.send(['block', m])
       }
+      */
     }
   })
 
   // Don't trust ZMQ. Try synchronizing every 1 minute in case ZMQ didn't fire
   setInterval(async function() {
+    await sync('block')
+  /*
     let m = await sync('block')
     if (m) {
       // if the there was a new block, send message
       outsock.send(['block', m])
     }
+    */
   }, 60000)
 
 }
@@ -196,6 +213,11 @@ const sync = async function(type, hash) {
         console.timeEnd('DB Insert ' + index)
         console.log('------------------------------------------')
         console.log('\n')
+
+        // zmq broadcast
+        let b = { i: index, txs: content }
+        console.log("Zmq block = ", JSON.stringify(b, null, 2))
+        outsock.send(['block', JSON.stringify(b)])
       }
 
       // clear mempool and synchronize
@@ -222,9 +244,20 @@ const sync = async function(type, hash) {
   } else if (type === 'mempool') {
     queue.add(async function() {
       let content = await request.tx(hash)
-      await Db.mempool.insert(content)
-      console.log('# Q inserted [size: ' + queue.size + ']',  hash)
-      console.log(content)
+      try {
+        await Db.mempool.insert(content)
+        console.log('# Q inserted [size: ' + queue.size + ']',  hash)
+        console.log(content)
+        outsock.send(['mempool', JSON.stringify(content)])
+      } catch (e) {
+        // duplicates are ok because they will be ignored
+        if (e.code == 11000) {
+          console.log("Duplicate mempool item: ", content)
+        } else {
+          console.log('## ERR ', e, content)
+          process.exit()
+        }
+      }
     })
     return hash
   }
