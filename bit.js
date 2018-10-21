@@ -10,7 +10,6 @@ const jq = require('bigjq')
 const bcode = require('bcode')
 
 const Filter = require('./bitdb.json')
-const Encoding = require('./encoding')
 
 var Db
 var Info
@@ -129,7 +128,7 @@ const crawl = async function(block_index) {
         btxs = bcode.decode(btxs)
         btxs  = await jq.run(processor, btxs)
       }
-      console.log("Filtered Xputs = ", btxs.length);
+      console.log('Filtered Xputs = ', btxs.length)
     }
 
     console.log('Block ' + block_index + ' : ' + txs.length + 'txs | ' + btxs.length + ' filtered txs')
@@ -195,7 +194,7 @@ const sync = async function(type, hash) {
 
         // zmq broadcast
         let b = { i: index, txs: content }
-        console.log("Zmq block = ", JSON.stringify(b, null, 2))
+        console.log('Zmq block = ', JSON.stringify(b, null, 2))
         outsock.send(['block', JSON.stringify(b)])
       }
 
@@ -231,7 +230,7 @@ const sync = async function(type, hash) {
       } catch (e) {
         // duplicates are ok because they will be ignored
         if (e.code == 11000) {
-          console.log("Duplicate mempool item: ", content)
+          console.log('Duplicate mempool item: ', content)
         } else {
           console.log('## ERR ', e, content)
           process.exit()

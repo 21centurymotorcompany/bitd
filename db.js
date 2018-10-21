@@ -128,7 +128,7 @@ var block = {
             o[keys[i]] = 1
             console.time('Index:' + keys[i])
             try {
-              if (keys[i] === "tx.h") {
+              if (keys[i] === 'tx.h') {
                 await db.collection(collectionName).createIndex(o, { unique: true })
                 console.log('* Created unique index for ', keys[i])
               } else {
