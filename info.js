@@ -6,18 +6,18 @@ const Filter = require('./bitdb.json')
 */
 const checkpoint = function() {
   return new Promise(async function(resolve, reject) {
-    kv.get("tip", function(err, value) {
+    kv.get('tip', function(err, value) {
       if (err) {
         if (err.notFound) {
-          console.log("Checkpoint not found, starting from GENESIS")
+          console.log('Checkpoint not found, starting from GENESIS')
           resolve(Filter.from)
         } else {
-          console.log("err", err)
+          console.log('err', err)
           reject(err)
         }
       } else {
         let cp = parseInt(value)
-        console.log("Checkpoint found,", cp)
+        console.log('Checkpoint found,', cp)
         resolve(cp)
       }
     })
@@ -25,12 +25,12 @@ const checkpoint = function() {
 }
 const updateTip = function(index) {
   return new Promise(function(resolve, reject) {
-    kv.put("tip", index, function(err) {
+    kv.put('tip', index, function(err) {
       if (err) {
         console.log(err)
         reject()
       } else {
-        console.log("Tip updated to", index)
+        console.log('Tip updated to', index)
         resolve()
       }
     })
@@ -38,12 +38,12 @@ const updateTip = function(index) {
 }
 const deleteTip = function() {
   return new Promise(function(resolve, reject) {
-    kv.del("tip", function(err) {
+    kv.del('tip', function(err) {
       if (err) {
         console.log(err)
         reject()
       } else {
-        console.log("Tip deleted")
+        console.log('Tip deleted')
         resolve()
       }
     })
