@@ -2,8 +2,8 @@ const ip = require('ip')
 module.exports = {
   'rpc': {
     'protocol': 'http',
-    'user': 'root',
-    'pass': 'bitcoin',
+    'user': process.env.rpc_user ? process.env.rpc_user : 'root',
+    'pass': process.env.rpc_pass ? process.env.rpc_pass : 'bitcoin',
     'host': process.env.host ? process.env.host : ip.address(),
     'port': '8332',
     'limit': 15
