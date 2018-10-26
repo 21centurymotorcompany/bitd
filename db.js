@@ -63,7 +63,7 @@ var block = {
   replace: async function(items, block_index) {
     console.log('Deleting all blocks greater than or equal to', block_index)
     await db.collection('confirmed').deleteMany({
-      block_index: {
+      'blk.i': {
         $gte: block_index
       }
     }).catch(function(err) {
