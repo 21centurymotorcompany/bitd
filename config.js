@@ -5,12 +5,15 @@ module.exports = {
     'user': process.env.rpc_user ? process.env.rpc_user : 'root',
     'pass': process.env.rpc_pass ? process.env.rpc_pass : 'bitcoin',
     'host': process.env.host ? process.env.host : ip.address(),
-    'port': '8332',
+    'port': process.env.rpc_port ? process.env.rpc_port : '8332',
     'limit': 15
   },
   'db': {
     'name': 'bitdb',
-    'url': 'mongodb://localhost:27017',
+    'url':
+      'mongodb://' +
+      (process.env.mongo_host ? process.env.mongo_host : 'localhost') +
+      ':27017',
     'index': {
       'confirmed': {
         'keys': [
